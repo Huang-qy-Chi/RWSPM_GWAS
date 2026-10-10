@@ -1,0 +1,35 @@
+# Private inputs and generated arrays
+data/
+*.npy
+*.npz
+*.rdata
+*.RData
+*.Rdata
+*.csv
+*.tsv
+
+# Experiment outputs, monitors, caches
+runs/
+results*/
+bench_*/
+benchmark_*/
+simulated_*/
+_gtilde_cache*
+*.log
+*.pid
+*.jsonl
+*.tmp
+
+# Build products and Python environments
+*.so
+*.dll
+*.dylib
+*.o
+*.a
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+Thumbs.db

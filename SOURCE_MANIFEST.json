@@ -1,0 +1,244 @@
+{
+  "snapshot_date": "2026-10-10",
+  "source_kind": "remote experimental project snapshot",
+  "python_source_count": 23,
+  "sources": [
+    {
+      "path": "GWAS_left.py",
+      "source_sha256": "f3c9441286e011d8b64aee62b68e6c77908ebfb957e5e687f12ecf4e75ac8cb7",
+      "packaged_sha256": "f3c9441286e011d8b64aee62b68e6c77908ebfb957e5e687f12ecf4e75ac8cb7",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "GWAS_left_simple.py",
+      "source_sha256": "746d06b8b7fb6444395c3373272a9c92372d5d963a8015ec1c935cd6109bae66",
+      "packaged_sha256": "746d06b8b7fb6444395c3373272a9c92372d5d963a8015ec1c935cd6109bae66",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "GWAS_right.py",
+      "source_sha256": "7f113c14981df5eecbad52d0d8ba0366ad5f31a10c549ae9057c50cf32bfb5cd",
+      "packaged_sha256": "7f113c14981df5eecbad52d0d8ba0366ad5f31a10c549ae9057c50cf32bfb5cd",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "bcov.py",
+      "source_sha256": "ad8f0d0ba8856685a7337229a4316c1c4fda3783b338ec7a07c04c6e10fd850a",
+      "packaged_sha256": "ad8f0d0ba8856685a7337229a4316c1c4fda3783b338ec7a07c04c6e10fd850a",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "bench_large_window.py",
+      "source_sha256": "2ae78e289fa082a019e33a046041616d010759236c7d50f3b9b09783bb06694a",
+      "packaged_sha256": "2ae78e289fa082a019e33a046041616d010759236c7d50f3b9b09783bb06694a",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "bench_limit_1270.py",
+      "source_sha256": "020cc38aaeab34d0959525e9048483e4cfa122c067b9b3f1a3224e2c2229cf9a",
+      "packaged_sha256": "020cc38aaeab34d0959525e9048483e4cfa122c067b9b3f1a3224e2c2229cf9a",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "bench_n10000_batch.py",
+      "source_sha256": "f799b1fc0f92fe42f1253dab594838d5b4ae5730520b7e24b5a51baf46cb31ab",
+      "packaged_sha256": "f799b1fc0f92fe42f1253dab594838d5b4ae5730520b7e24b5a51baf46cb31ab",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "bench_n10000_gamma_batch.py",
+      "source_sha256": "ddf4820fad869d80a85616f60e45413e6ad8fa014d76e5d2ed302f7cb8b0d65b",
+      "packaged_sha256": "c3f12aaabdb3a447869f5f421e571fad86cfc57b3be447052e0911d4d69bff85",
+      "modified_for_packaging": true
+    },
+    {
+      "path": "benchmark_adni44.py",
+      "source_sha256": "2dfcef2eba78a9c6664aaa1b7d93232edcd3e4b4ff690cef3582b48ad48fd90a",
+      "packaged_sha256": "2dfcef2eba78a9c6664aaa1b7d93232edcd3e4b4ff690cef3582b48ad48fd90a",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/Ball_omp.h",
+      "source_sha256": "1ecc08496387e39721fcf9b8b3bd2be3b9b0c4c28480ed7140f4bd69888ff376",
+      "packaged_sha256": "1ecc08496387e39721fcf9b8b3bd2be3b9b0c4c28480ed7140f4bd69888ff376",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/bdd_matrix.c",
+      "source_sha256": "a0370bcd3b61c5b8922b919a919b488cf7b5eb42db1507945fdb7d543ef5c5a7",
+      "packaged_sha256": "a0370bcd3b61c5b8922b919a919b488cf7b5eb42db1507945fdb7d543ef5c5a7",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/bdd_matrix.h",
+      "source_sha256": "a918b2d967d4b54f8366cb0d11bf5ae19634fd7b7bcdfd1c8c34883301086b7f",
+      "packaged_sha256": "a918b2d967d4b54f8366cb0d11bf5ae19634fd7b7bcdfd1c8c34883301086b7f",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/cball_wrapper.c",
+      "source_sha256": "72430befb58a362ef06b58428d9a030868b2b4006675e06fa0e47c86ac3a943a",
+      "packaged_sha256": "72430befb58a362ef06b58428d9a030868b2b4006675e06fa0e47c86ac3a943a",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/compile_linux.sh",
+      "source_sha256": "5546e3a9ce545b7e47b6f901cb5245b031534c96b3480619f4105227c4f73908",
+      "packaged_sha256": "5546e3a9ce545b7e47b6f901cb5245b031534c96b3480619f4105227c4f73908",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/compile_snp_linux.sh",
+      "source_sha256": "9f6a2aa287200ed7f63e6946a8ba6001334f170aba7922e488c08856e2ba9a84",
+      "packaged_sha256": "9f6a2aa287200ed7f63e6946a8ba6001334f170aba7922e488c08856e2ba9a84",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/compile_snp_win.bat",
+      "source_sha256": "ca491e2ccc2c321a791d476c838096a7ab1efbc7869e34821e4f4c33008d60d6",
+      "packaged_sha256": "ca491e2ccc2c321a791d476c838096a7ab1efbc7869e34821e4f4c33008d60d6",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/compile_win.bat",
+      "source_sha256": "cdd462f97c9afa4231efe145d59429598dc24e643ee82395cd669ead7732bc4d",
+      "packaged_sha256": "cdd462f97c9afa4231efe145d59429598dc24e643ee82395cd669ead7732bc4d",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/median.c",
+      "source_sha256": "88a433b505e4acea7c0f134063c6b5adcee5dd83c9a7af033dbedd7498b31164",
+      "packaged_sha256": "88a433b505e4acea7c0f134063c6b5adcee5dd83c9a7af033dbedd7498b31164",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/median.h",
+      "source_sha256": "93541dbbc8a75e61479b8134dd9bd510a2d2b4ad75c38d0737beef66c93ea0dc",
+      "packaged_sha256": "93541dbbc8a75e61479b8134dd9bd510a2d2b4ad75c38d0737beef66c93ea0dc",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/snp_bcov.c",
+      "source_sha256": "1926c9b014bb3d765cde9b59e67998da61a57b13fd5d3137201f618cff269621",
+      "packaged_sha256": "1926c9b014bb3d765cde9b59e67998da61a57b13fd5d3137201f618cff269621",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/utilities.c",
+      "source_sha256": "66a0b87b920fe7d09df73951c650b11050abc5566e99add9005bb517eb28a57e",
+      "packaged_sha256": "66a0b87b920fe7d09df73951c650b11050abc5566e99add9005bb517eb28a57e",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "cball_ext/utilities.h",
+      "source_sha256": "6c70ec99cbd446412c519cc269460d35abadf9301300d0b82cadc9b59eda8cd9",
+      "packaged_sha256": "6c70ec99cbd446412c519cc269460d35abadf9301300d0b82cadc9b59eda8cd9",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "check_n10000_batch.py",
+      "source_sha256": "d0fbebee7621dafafebd0139806e1e422464c2926c5a2b29466113a2e3b26422",
+      "packaged_sha256": "d0fbebee7621dafafebd0139806e1e422464c2926c5a2b29466113a2e3b26422",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "compare_adni44_distance.py",
+      "source_sha256": "5a0daa27ad8f621ac46b5029ab80fd1bd91b1e350d484325dd96e3ecd6e1f184",
+      "packaged_sha256": "5a0daa27ad8f621ac46b5029ab80fd1bd91b1e350d484325dd96e3ecd6e1f184",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "compare_gamma_stability.py",
+      "source_sha256": "78477cfbed638a04d4c75cdb7edf3f24c10b3bcb457d754ab717bc27696114ce",
+      "packaged_sha256": "78477cfbed638a04d4c75cdb7edf3f24c10b3bcb457d754ab717bc27696114ce",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "compare_rwspm_bcov.py",
+      "source_sha256": "a24d80223121870826ba75f2e9facf91ce1409bdf7061c32593d05e45354461a",
+      "packaged_sha256": "a24d80223121870826ba75f2e9facf91ce1409bdf7061c32593d05e45354461a",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "gammafit.py",
+      "source_sha256": "5d436479f4f7ead1e124319a5250cfceb8715856793c2a37adae2b42419fa78a",
+      "packaged_sha256": "5d436479f4f7ead1e124319a5250cfceb8715856793c2a37adae2b42419fa78a",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "generate_adni_data.py",
+      "source_sha256": "7a0bd46d73b4dba9d0ce5f46d0f2e7b0bff89d47ea901350118f519c59e41e37",
+      "packaged_sha256": "7a0bd46d73b4dba9d0ce5f46d0f2e7b0bff89d47ea901350118f519c59e41e37",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "lqd.py",
+      "source_sha256": "20344b6f7bd5afcd976028c23b2a19f6600c754c7effdae9ecebee3d38e05fb2",
+      "packaged_sha256": "20344b6f7bd5afcd976028c23b2a19f6600c754c7effdae9ecebee3d38e05fb2",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "probe_distance_memory.py",
+      "source_sha256": "0b064db6d2dc417119e766f26f5bd53ecb2d5536483331313ddb12cddd067d84",
+      "packaged_sha256": "0b064db6d2dc417119e766f26f5bd53ecb2d5536483331313ddb12cddd067d84",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "rwspm.py",
+      "source_sha256": "92446e2a2c4e169c7b8abf30de14a71d4a025fa2b51fb6e3d8d0f81d874d78f1",
+      "packaged_sha256": "92446e2a2c4e169c7b8abf30de14a71d4a025fa2b51fb6e3d8d0f81d874d78f1",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "seed.py",
+      "source_sha256": "02431765444d1ebe79e2661e9966bd50a3a4ec8b8127e1666b2edb8cbf3e14b1",
+      "packaged_sha256": "02431765444d1ebe79e2661e9966bd50a3a4ec8b8127e1666b2edb8cbf3e14b1",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "smoke_test_GWAS.py",
+      "source_sha256": "33dba815bf01e995a5638f66565ce654ccc555bbafc62f5fd932b0d00535d9f6",
+      "packaged_sha256": "33dba815bf01e995a5638f66565ce654ccc555bbafc62f5fd932b0d00535d9f6",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "summarize_large_window.py",
+      "source_sha256": "2c0ede61a4d0295cc7a53f2b0856fe9e30e1343aae260d399ff0498020226961",
+      "packaged_sha256": "2c0ede61a4d0295cc7a53f2b0856fe9e30e1343aae260d399ff0498020226961",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "test_generate_adni_data.py",
+      "source_sha256": "dc00b28e50f46c0e083336ceca34632ec26e23e66d05e032f50675df8ab8ee3d",
+      "packaged_sha256": "dc00b28e50f46c0e083336ceca34632ec26e23e66d05e032f50675df8ab8ee3d",
+      "modified_for_packaging": false
+    },
+    {
+      "path": "validate_generated_adni.py",
+      "source_sha256": "648fb2c136e0600403b33010fae44d0bfc005ecc23453c2a4e4725a17efb5a89",
+      "packaged_sha256": "648fb2c136e0600403b33010fae44d0bfc005ecc23453c2a4e4725a17efb5a89",
+      "modified_for_packaging": false
+    }
+  ],
+  "packaging_changes": [
+    "Added Chinese README.md and English README.en.md with linked local SVG language buttons.",
+    "Added requirements, gitignore, third-party notices and official GNU GPL v3 text.",
+    "Added --prior_output to the copied Gamma benchmark; existing defaults preserved, configurable paths forwarded to stability analysis."
+  ],
+  "excluded": [
+    "private and resampled data",
+    "experiment outputs",
+    "logs",
+    "PID files",
+    "compiled binaries",
+    "Python caches",
+    "old backup code and outdated operator README"
+  ],
+  "validation": {
+    "linux_c_builds": "passed in isolated temporary directory from the source archive",
+    "aligned_resampling_test": "passed",
+    "synthetic_left_right_smoke": "passed: n=30, permutations=19, workers=2",
+    "python_syntax": "all 23 Python files parsed",
+    "note": "Windows builds and a fresh full-size ADNI run were not performed during packaging."
+  }
+}
