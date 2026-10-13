@@ -64,6 +64,7 @@ the BDD library with the SNP library. Default builds do not enable OpenMP.
 
 ```bash
 python test_generate_adni_data.py
+python test_mtcct_indexing.py
 python smoke_test_GWAS.py --n_subj 30 --n_perm 19 --n_process 2
 ```
 
@@ -222,9 +223,14 @@ included. Use `gammafit.py` as a module: its standalone demo references an absen
 
 ## Provenance and third-party notices
 
-[SOURCE_MANIFEST.json](SOURCE_MANIFEST.json) records source checksums and local
-packaging changes. Apart from configurable output-baseline paths, packaging did
-not change statistical methods or default p-value paths.
+[SOURCE_MANIFEST.json](SOURCE_MANIFEST.json) records source checksums and changes.
+On 2026-10-13, both MTCCT entry points were fixed to interpret region vectors in
+row-major `(width_x, width_y)` order, using `width_y` as the coordinate/linear-index
+stride. The default 48×31 grid is no longer interpreted as 31×48. All 225 grid
+regression cases and both hemisphere smoke tests passed. BCov statistics, C
+kernels, permutations, Gamma fits and CCT weighting rules were unchanged.
+Historical archives are preserved; corrected results may differ when the selected
+connected component changes.
 
 Ball-related author and GPL notices are preserved. See
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and

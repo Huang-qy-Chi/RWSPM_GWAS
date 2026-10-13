@@ -52,6 +52,7 @@ Windows 使用 MinGW-w64，在 `cball_ext` 目录运行 `compile_snp_win.bat` �
 
 ```bash
 python test_generate_adni_data.py
+python test_mtcct_indexing.py
 python smoke_test_GWAS.py --n_subj 30 --n_perm 19 --n_process 2
 ```
 
@@ -163,6 +164,6 @@ python bench_n10000_gamma_batch.py monitor \
 
 ## 来源与第三方许可
 
-源文件校验和及本地整理变更见 [SOURCE_MANIFEST.json](SOURCE_MANIFEST.json)。除了输出基线路径可配置化，复制时未改变统计方法或默认p值路径。
+源文件校验和及本地整理变更见 [SOURCE_MANIFEST.json](SOURCE_MANIFEST.json)。2026-10-13 修复了两个 MTCCT 入口的网格索引：区域向量按 `(width_x, width_y)` 行优先展开，坐标转换及线性索引恢复统一使用 `width_y` 作为步长；默认48×31网格不再被解释为31×48。225个网格回归用例与左右GWAS冒烟已通过。BCov统计量、C内核、置换、Gamma拟合和CCT权重规则均未改变。历史归档结果保留；修复后的结果可能因所选连通簇改变而不同。
 
 保留了Ball相关C源码的作者与GPL声明，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [COPYING.GPL-3.0.txt](COPYING.GPL-3.0.txt)。本整理没有为其他原创文件额外指定整体许可证。输入数据的取得与使用须遵循其各自的数据协议。
