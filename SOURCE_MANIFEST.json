@@ -1,13 +1,13 @@
 {
   "snapshot_date": "2026-10-10",
   "source_kind": "remote experimental project snapshot",
-  "python_source_count": 23,
+  "python_source_count": 24,
   "sources": [
     {
       "path": "GWAS_left.py",
       "source_sha256": "f3c9441286e011d8b64aee62b68e6c77908ebfb957e5e687f12ecf4e75ac8cb7",
-      "packaged_sha256": "f3c9441286e011d8b64aee62b68e6c77908ebfb957e5e687f12ecf4e75ac8cb7",
-      "modified_for_packaging": false
+      "packaged_sha256": "f9638a933ca3cc61856b4f7305e8595ea41cd38a721c68ab329d3349f7375ae6",
+      "modified_for_packaging": true
     },
     {
       "path": "GWAS_left_simple.py",
@@ -186,8 +186,8 @@
     {
       "path": "rwspm.py",
       "source_sha256": "92446e2a2c4e169c7b8abf30de14a71d4a025fa2b51fb6e3d8d0f81d874d78f1",
-      "packaged_sha256": "92446e2a2c4e169c7b8abf30de14a71d4a025fa2b51fb6e3d8d0f81d874d78f1",
-      "modified_for_packaging": false
+      "packaged_sha256": "4a81f718c7a41f1c03ff7e52daf6af7c3c9bf85bde75066c0127357b476e771e",
+      "modified_for_packaging": true
     },
     {
       "path": "seed.py",
@@ -218,12 +218,20 @@
       "source_sha256": "648fb2c136e0600403b33010fae44d0bfc005ecc23453c2a4e4725a17efb5a89",
       "packaged_sha256": "648fb2c136e0600403b33010fae44d0bfc005ecc23453c2a4e4725a17efb5a89",
       "modified_for_packaging": false
+    },
+    {
+      "path": "test_mtcct_indexing.py",
+      "source_sha256": null,
+      "packaged_sha256": "080e01b0ad1c79077de433dccefa553322201d8e55a20b643d438c53b4d7f4cf",
+      "modified_for_packaging": false,
+      "origin": "regression tests added 2026-10-13"
     }
   ],
   "packaging_changes": [
     "Added Chinese README.md and English README.en.md with linked local SVG language buttons.",
     "Added requirements, gitignore, third-party notices and official GNU GPL v3 text.",
-    "Added --prior_output to the copied Gamma benchmark; existing defaults preserved, configurable paths forwarded to stability analysis."
+    "Added --prior_output to the copied Gamma benchmark; existing defaults preserved, configurable paths forwarded to stability analysis.",
+    "2026-10-13: corrected both MTCCT entry points to row-major grid shape (num_region_r,num_region_c), column stride num_region_c; added independent grid regression tests and bilingual documentation."
   ],
   "excluded": [
     "private and resampled data",
@@ -237,8 +245,11 @@
   "validation": {
     "linux_c_builds": "passed in isolated temporary directory from the source archive",
     "aligned_resampling_test": "passed",
-    "synthetic_left_right_smoke": "passed: n=30, permutations=19, workers=2",
-    "python_syntax": "all 23 Python files parsed",
-    "note": "Windows builds and a fresh full-size ADNI run were not performed during packaging."
-  }
+    "synthetic_left_right_smoke": "passed after indexing fix: n=30, permutations=19, workers=2",
+    "python_syntax": "updated sources parsed/compiled; no full BCov rerun",
+    "note": "Windows builds and a fresh full-size ADNI run were not performed during packaging.",
+    "mtcct_indexing": "225 grid cases passed against independent traversal; both public entry points tested.",
+    "saved_full_scan_reaggregation": "passed on saved n10000/1488 p-values; agrees with archived actual-grid sensitivity; BCov not rerun"
+  },
+  "revision_date": "2026-10-13"
 }
