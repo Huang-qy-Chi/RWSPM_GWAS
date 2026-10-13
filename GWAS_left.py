@@ -398,11 +398,13 @@ def rw_mtcct_report(pvec, num_region_r, num_region_c, alpha0=ALPHA0):
     sig_idx = np.where(sig_mask)[0]
     min_pos = int(sig_idx[np.argmin(pvec[sig_idx])])
 
-    min_x = (min_pos // num_region_r) + 1        # 1-based
-    min_y = (min_pos % num_region_r) + 1
+    # slide_width_step is row-major: (num_region_r, num_region_c).
+    # The column count is the stride for both coordinate conversions.
+    min_x = (min_pos // num_region_c) + 1        # 1-based row
+    min_y = (min_pos % num_region_c) + 1         # 1-based column
 
-    o_matrix = pvec.reshape(num_region_c, num_region_r)
-    sig_coords = np.column_stack(np.where(o_matrix < alpha0))  # (row=y, col=x)
+    o_matrix = pvec.reshape(num_region_r, num_region_c)
+    sig_coords = np.column_stack(np.where(o_matrix < alpha0))  # (row=x, col=y)
     sig_coords[:, 0] += 1
     sig_coords[:, 1] += 1
 
@@ -429,7 +431,7 @@ def rw_mtcct_report(pvec, num_region_r, num_region_c, alpha0=ALPHA0):
 
     comp_vertices = list(comps[comp_id])
     detect_index = (
-        (sig_coords[comp_vertices, 0] - 1) * num_region_r
+        (sig_coords[comp_vertices, 0] - 1) * num_region_c
         + sig_coords[comp_vertices, 1]
     )  # 1-based linear region index
     B = len(detect_index)
