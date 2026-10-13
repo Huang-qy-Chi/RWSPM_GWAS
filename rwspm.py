@@ -627,13 +627,14 @@ def RW_MTCCT(pvalue_mat, num_region_r, num_region_c, threshold=0.05):
         min_pos = int(np.where(pvec == min_sig)[0][0])
 
         # Convert to matrix coordinates (row, col)
-        min_x = (min_pos // num_region_r) + 1        # 1-based
-        min_y = (min_pos % num_region_r) + 1
+        # Row-major region order: column count is the linear stride.
+        min_x = (min_pos // num_region_c) + 1        # 1-based row
+        min_y = (min_pos % num_region_c) + 1         # 1-based column
 
         # 2. Construct a significant matrix
-        o_matrix = pvec.reshape(num_region_c, num_region_r)
+        o_matrix = pvec.reshape(num_region_r, num_region_c)
         sig_coords = np.column_stack(np.where(o_matrix < threshold))
-        # sig_coords: (row, col) in 0-based, where row = y, col = x
+        # sig_coords: (row=x, col=y), initially 0-based
         sig_coords[:, 0] += 1   # convert to 1-based
         sig_coords[:, 1] += 1
 
@@ -673,7 +674,7 @@ def RW_MTCCT(pvalue_mat, num_region_r, num_region_c, threshold=0.05):
         # 3. Restore original linear indices
         # o.index[comp_vertices, :] gives (row, col) in 1-based
         detect_index = (
-            (sig_coords[comp_vertices, 0] - 1) * num_region_r
+            (sig_coords[comp_vertices, 0] - 1) * num_region_c
             + sig_coords[comp_vertices, 1]
         )  # 1-based
 
