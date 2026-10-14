@@ -171,9 +171,21 @@ read-only systemd status tool; pass `--output_dir` and `--unit` explicitly.
 
 ## Methods and current limitations
 
+This branch adds a fourth method, **`gamma_sample`**, with `--ratio=0.1` by
+default: fixed genotype-stratified sampling per SNP, subset permutations and
+scaled Gamma calibration. Every originally present genotype is retained;
+integer-quota errors and fallbacks are recorded. See
+[gamma_sample documentation](docs/gamma_sample.md).
+
+```bash
+python smoke_test_GWAS.py --method gamma_sample --ratio 0.1 --backend c --n_subj 60 --n_perm 199 --n_process 2
+python test_gamma_sample.py
+```
+
 | Method | Computation | Limitation |
 |---|---|---|
 | `gamma` | Two-parameter Gamma matched to permutation mean/sample variance | Extreme tails are model extrapolations; more permutations do not guarantee a correct distributional fit |
+| `gamma_sample` | Fixed stratified subset, fit m×BCov_m² and evaluate n×BCov_n² | Approximate transfer from a conditional subset null requires calibration |
 | `permu` | `(1 + exceedances)/(B + 1)` | Resolution is `1/(B+1)`; appropriate exchangeability is required |
 | `limit` | SNP/image BDD kernels, joint spectrum, three-cumulant HBE approximation | Expensive construction/decomposition; asymptotic calibration still needs validation |
 

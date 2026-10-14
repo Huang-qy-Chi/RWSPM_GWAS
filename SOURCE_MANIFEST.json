@@ -1,12 +1,12 @@
 {
   "snapshot_date": "2026-10-10",
   "source_kind": "remote experimental project snapshot",
-  "python_source_count": 24,
+  "python_source_count": 25,
   "sources": [
     {
       "path": "GWAS_left.py",
       "source_sha256": "f3c9441286e011d8b64aee62b68e6c77908ebfb957e5e687f12ecf4e75ac8cb7",
-      "packaged_sha256": "f9638a933ca3cc61856b4f7305e8595ea41cd38a721c68ab329d3349f7375ae6",
+      "packaged_sha256": "7be16d7693f6fc2633d9cf8df6aeef5783803adb5c3a39850388af6a146e09f1",
       "modified_for_packaging": true
     },
     {
@@ -24,8 +24,8 @@
     {
       "path": "bcov.py",
       "source_sha256": "ad8f0d0ba8856685a7337229a4316c1c4fda3783b338ec7a07c04c6e10fd850a",
-      "packaged_sha256": "ad8f0d0ba8856685a7337229a4316c1c4fda3783b338ec7a07c04c6e10fd850a",
-      "modified_for_packaging": false
+      "packaged_sha256": "92eb15f8b29adab589c9b3deb889424169ee28dc97fd2ed136453544a05273fa",
+      "modified_for_packaging": true
     },
     {
       "path": "bench_large_window.py",
@@ -198,8 +198,8 @@
     {
       "path": "smoke_test_GWAS.py",
       "source_sha256": "33dba815bf01e995a5638f66565ce654ccc555bbafc62f5fd932b0d00535d9f6",
-      "packaged_sha256": "33dba815bf01e995a5638f66565ce654ccc555bbafc62f5fd932b0d00535d9f6",
-      "modified_for_packaging": false
+      "packaged_sha256": "c9b33d3063a52a190f2cd11f6e6a4a31f335042392d4c3b50f18fb8a31897ae9",
+      "modified_for_packaging": true
     },
     {
       "path": "summarize_large_window.py",
@@ -225,13 +225,21 @@
       "packaged_sha256": "080e01b0ad1c79077de433dccefa553322201d8e55a20b643d438c53b4d7f4cf",
       "modified_for_packaging": false,
       "origin": "regression tests added 2026-10-13"
+    },
+    {
+      "path": "test_gamma_sample.py",
+      "source_sha256": null,
+      "packaged_sha256": "b139b682b40cf980540aec595dda7dc2a7f472b3fdad3fc73d845ee9519bf28c",
+      "modified_for_packaging": false,
+      "origin": "gamma_sample regression tests added 2026-10-14"
     }
   ],
   "packaging_changes": [
     "Added Chinese README.md and English README.en.md with linked local SVG language buttons.",
     "Added requirements, gitignore, third-party notices and official GNU GPL v3 text.",
     "Added --prior_output to the copied Gamma benchmark; existing defaults preserved, configurable paths forwarded to stability analysis.",
-    "2026-10-13: corrected both MTCCT entry points to row-major grid shape (num_region_r,num_region_c), column stride num_region_c; added independent grid regression tests and bilingual documentation."
+    "2026-10-13: corrected both MTCCT entry points to row-major grid shape (num_region_r,num_region_c), column stride num_region_c; added independent grid regression tests and bilingual documentation.",
+    "2026-10-14: code_ADNI(3) adds gamma_sample with fixed genotype-stratified sampling, ratio=0.1, scaled Gamma calibration, deterministic per-SNP plans, diagnostics, explicit fallbacks and Windows smoke support. Existing three methods and C sources retained."
   ],
   "excluded": [
     "private and resampled data",
@@ -247,9 +255,12 @@
     "aligned_resampling_test": "passed",
     "synthetic_left_right_smoke": "passed after indexing fix: n=30, permutations=19, workers=2",
     "python_syntax": "updated sources parsed/compiled; no full BCov rerun",
-    "note": "Windows builds and a fresh full-size ADNI run were not performed during packaging.",
+    "note": "Linux validation entries concern inherited code. gamma_sample has only local small-sample validation; large-sample and statistical calibration are not established.",
     "mtcct_indexing": "225 grid cases passed against independent traversal; both public entry points tested.",
-    "saved_full_scan_reaggregation": "passed on saved n10000/1488 p-values; agrees with archived actual-grid sensitivity; BCov not rerun"
+    "saved_full_scan_reaggregation": "passed on saved n10000/1488 p-values; agrees with archived actual-grid sensitivity; BCov not rerun",
+    "gamma_sample": "Local C/NumPy and independent subset-rank/scaled-moment checks passed; quotas, rare/missing classes, ratio=1, degeneracy fallback and two-worker multi-SNP Windows pipeline passed.",
+    "gamma_sample_windows_smoke": "Passed in code_ADNI(3): both hemispheres, n=60, 40 regions each, C backend, n_perm=199, ratio=0.1, 2 workers.",
+    "original_method_regression": "gamma, permu and limit exactly matched code_ADNI(2) on identical small inputs, same C kernels and permutations."
   },
-  "revision_date": "2026-10-13"
+  "revision_date": "2026-10-14"
 }

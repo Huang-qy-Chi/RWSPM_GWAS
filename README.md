@@ -127,9 +127,17 @@ python bench_n10000_gamma_batch.py monitor \
 
 ## 方法差异与已知限制
 
+本分支新增第四种方法 **`gamma_sample`**：每个SNP固定分层抽样、子样本置换、缩放Gamma校准，`--ratio`默认0.1。保证保留所有原本存在的基因型类别，记录整数配额误差与回退行为。使用方式和统计限制见 [gamma_sample说明](docs/gamma_sample.md)。本机验证命令：
+
+```bash
+python smoke_test_GWAS.py --method gamma_sample --ratio 0.1 --backend c --n_subj 60 --n_perm 199 --n_process 2
+python test_gamma_sample.py
+```
+
 | 方法 | 当前计算路径 | 主要限制 |
 |---|---|---|
 | `gamma` | 置换均值、样本方差拟合二参数Gamma | 极端尾部依赖模型外推，增加置换不保证消除拟合误差 |
+| `gamma_sample` | 固定分层子样本置换，用m×BCov_m²拟合，评价n×BCov_n² | 子样本条件零分布向全样本的近似迁移，需要校准 |
 | `permu` | `(1 + 超过次数)/(B + 1)` | p值分辨率为`1/(B+1)`；依赖适当的可交换性条件 |
 | `limit` | SNP与影像BDD核、联合谱、三累积量HBE近似 | 核构造与分解昂贵，渐近近似仍需要校准 |
 

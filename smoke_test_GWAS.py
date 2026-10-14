@@ -93,7 +93,7 @@ def make_synthetic_data(n_subj=60, M1=30, M2=20, seed=7):
 # Per-side runner: point the shared GWAS_left module at synthetic data and
 # run the full pipeline for one hemisphere (left or right).
 # ---------------------------------------------------------------------------
-def run_side(side, n_subj, n_perm, n_process, seed):
+def run_side(side, n_subj, n_perm, n_process, seed, method='gamma', ratio=0.1, backend='auto'):
     """Run the full pipeline for one hemisphere; return (results, out_dir)."""
     gl.SIDE = side
     gl.M1, gl.M2 = 30, 20                  # image 150x100 -> 30x20
@@ -110,7 +110,7 @@ def run_side(side, n_subj, n_perm, n_process, seed):
     print(f"SMOKE TEST [{side.upper()}] - synthetic data, NO real ADNI files used")
     print("=" * 72)
     results = gl.run_gwas(snp_start=0, n_snp=1, n_perm=n_perm,
-                          method="gamma", n_process=n_process,
+                          method=method, n_process=n_process,ratio=ratio,backend=backend,
                           seed=seed, save_region_pvals=False)
     return results, os.path.join(HERE, gl.OUT_DIR)
 
@@ -173,6 +173,9 @@ def main(argv=None):
     parser.add_argument("--n_perm", type=int, default=10)
     parser.add_argument("--n_process", type=int, default=2)
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument('--method',choices=['gamma','permu','limit','gamma_sample'],default='gamma')
+    parser.add_argument('--ratio',type=float,default=0.1)
+    parser.add_argument('--backend',choices=['auto','c','numpy'],default='auto')
     args = parser.parse_args(argv)
 
     print("=" * 72)
@@ -187,6 +190,7 @@ def main(argv=None):
         results[side], out_dirs[side] = run_side(
             side, n_subj=args.n_subj, n_perm=args.n_perm,
             n_process=args.n_process, seed=args.seed,
+            method=args.method,ratio=args.ratio,backend=args.backend,
         )
     wall = time.time() - t0
 

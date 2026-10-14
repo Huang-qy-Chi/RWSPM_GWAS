@@ -76,6 +76,8 @@ from rwspm import slide_width_step          # noqa: E402  (region partition)
 from lqd import LQD                         # noqa: E402  (LQD transform)
 from bcov import (                          # noqa: E402  (BCov permutation test)
     bcov_snp_stat,
+    bcov_snp_gamma_sample,
+    make_gamma_sample_plan,
     bcov_snp_null,
     bcov_snp_limit,
     bcov_perm_test_snp_gwas,
@@ -156,12 +158,16 @@ def estimate_ry_cache_mb(n_subj, n_regions):
 
 def init_worker(ADNI, G_tilde, n_perm, method, seed,
                 backend="auto", cache=True, cache_max=0,
-                distance_backend="cdist", distance_block_size=128):
+                distance_backend="cdist", distance_block_size=128,
+                ratio=0.1, perm_seed=20260101, share_perms=True):
     """Pool initializer — copy-on-write sharing of read-only data (fork) or
     per-process copy (spawn).  Also gives each worker a distinct RNG stream."""
     global ADNI_global, G_TILDE_global, N_PERM_global, METHOD_global
     global BACKEND_global, CACHE_global, _RY_CACHE_MAX
     global DISTANCE_BACKEND_global, DISTANCE_BLOCK_SIZE_global
+    global SAMPLE_RATIO, SAMPLE_SEED, SAMPLE_SHARE, SAMPLE_PLAN, SAMPLE_SNP
+    SAMPLE_RATIO, SAMPLE_SEED, SAMPLE_SHARE = ratio, perm_seed, share_perms
+    SAMPLE_PLAN, SAMPLE_SNP = None, None
     ADNI_global = ADNI
     G_TILDE_global = G_tilde
     N_PERM_global = n_perm
@@ -331,6 +337,21 @@ def compute_one_region(args):
     """
     snp_idx, region_idx = args
     X_j = _snp_vector(snp_idx)
+    if METHOD_global == 'gamma_sample':
+        global SAMPLE_PLAN, SAMPLE_SNP
+        if SAMPLE_SNP != snp_idx:
+            SAMPLE_PLAN = make_gamma_sample_plan(X_j,SAMPLE_RATIO,N_PERM_global,SAMPLE_SEED+snp_idx)
+            SAMPLE_SNP = snp_idx
+        plan = SAMPLE_PLAN
+        if not SAMPLE_SHARE:
+            plan = dict(plan)
+            plan['perm_seed'] = SAMPLE_SEED+snp_idx+1000003*(region_idx+1)
+            plan['perms'] = make_permutations(plan['m'],N_PERM_global,seed=plan['perm_seed'])
+        ry = None if len(plan['levels']) == 1 else get_region_rank(region_idx)
+        stat,p,details = bcov_snp_gamma_sample(X_j,RY=ry,n_perm=N_PERM_global,
+                                              ratio=SAMPLE_RATIO,backend=BACKEND_global,
+                                              plan=plan,return_details=True)
+        return {'region':region_idx,'stat':stat,'p':p,**details}
     if np.all(X_j == X_j[0]):                 # degenerate SNP -> no signal
         return 1.0
 
@@ -501,7 +522,7 @@ def run_gwas(snp_start=0, n_snp=2, n_perm=2, method="gamma",
              max_regions=None, save_region_pvals=True,
              backend="auto", cache_rank=True, cache_budget_mb=8000.0,
              share_perms=True, perm_seed=20260101,
-             distance_backend="cdist", distance_block_size=128):
+             distance_backend="cdist", distance_block_size=128, ratio=0.1):
     """Run the region-wise GWAS on the configured hemisphere.
 
     Parameters
@@ -557,6 +578,9 @@ def run_gwas(snp_start=0, n_snp=2, n_perm=2, method="gamma",
         temporaries; numpy_blocked preserves the original NumPy reduction.
     distance_block_size : int
         Positive row block size for numpy_blocked (default 128).
+    ratio : float
+        Fixed stratified sample fraction for gamma_sample only (default 0.1).
+        All present genotypes retained. Calibrate m*BCov_m^2 against n*BCov_n^2.
     """
     t_total0 = time.time()
     if distance_backend not in ("cdist", "numpy_blocked"):
@@ -573,6 +597,9 @@ def run_gwas(snp_start=0, n_snp=2, n_perm=2, method="gamma",
     print(f"[{SIDE}] Loading data ...")
     adni, cov, hipp = load_data()
     n_subj, n_snp_total = adni.shape
+    if method == 'gamma_sample':
+        # Validate before starting worker processes or expensive preprocessing.
+        make_gamma_sample_plan(adni[:,snp_start],ratio,n_perm,perm_seed+snp_start)
     print(f"[{SIDE}] SNPs: {adni.shape}, covariates: {cov.shape}, "
           f"hippocampus: {hipp.shape}")
 
@@ -660,12 +687,20 @@ def run_gwas(snp_start=0, n_snp=2, n_perm=2, method="gamma",
         processes=n_process,
         initializer=init_worker,
         initargs=(adni, G_tilde, n_perm, method, seed, be, cache_rank,
-                  cache_max, distance_backend, distance_block_size),
+                  cache_max, distance_backend, distance_block_size,ratio,perm_seed,share_perms),
     ) as pool:
         for j in range(snp_start, end_snp):
             t_snp0 = time.time()
 
-            if share_perms:
+            if method == 'gamma_sample':
+                import json
+                plan=make_gamma_sample_plan(adni[:,j],ratio,n_perm,perm_seed+j)
+                os.makedirs(os.path.join(HERE,OUT_DIR),exist_ok=True)
+                np.savez(os.path.join(HERE,OUT_DIR,f'gamma_sample_plan_snp_{j:05d}.npz'),
+                         indices=plan['indices'],perms=plan['perms'])
+                with open(os.path.join(HERE,OUT_DIR,f'gamma_sample_plan_snp_{j:05d}.json'),'w') as f:
+                    json.dump({k:v for k,v in plan.items() if k not in ('indices','perms')},f,indent=2)
+            elif share_perms:
                 # One permutation set per SNP: the null distribution of a region
                 # depends only on (n, RY, permutations), so a single draw serves
                 # every region -- this is what removes n_perm kernel calls from
@@ -675,9 +710,13 @@ def run_gwas(snp_start=0, n_snp=2, n_perm=2, method="gamma",
             else:
                 installed = pool.map(_clear_perms, range(n_process))
 
-            pvals = np.array(
-                pool.map(compute_one_region, [(j, r) for r in range(m)])
-            )
+            region_outputs=pool.map(compute_one_region,[(j,r) for r in range(m)])
+            if method == 'gamma_sample':
+                pvals=np.array([r['p'] for r in region_outputs])
+                with open(os.path.join(HERE,OUT_DIR,f'gamma_sample_diagnostics_snp_{j:05d}.json'),'w') as f:
+                    json.dump({'ratio':ratio,'method':method,'regions':region_outputs},f,indent=2)
+            else:
+                pvals=np.array(region_outputs)
             t_snp1 = time.time()
             dt_snp = t_snp1 - t_snp0
 
@@ -772,7 +811,7 @@ def run_gwas(snp_start=0, n_snp=2, n_perm=2, method="gamma",
              mean_per_snp=mean_per_snp,
              est_full_gwas_h=mean_per_snp * TOTAL_SNP_GWAS / 3600,
              est_sampled_h=est_sampled / 3600,
-             n_process=n_process, n_perm=n_perm, alpha0=alpha0,
+             n_process=n_process, n_perm=n_perm, alpha0=alpha0,ratio=ratio,method=method,
              m_regions=m, m_all_regions=m_all, side=SIDE)
     print(f"[{SIDE}] Summary saved to {os.path.join(HERE, OUT_DIR)}")
     return results
@@ -794,10 +833,13 @@ def main(argv=None):
     parser.add_argument("--n_perm", type=int, default=2,
                         help="BCov permutations (default 2)")
     parser.add_argument("--method", type=str, default="gamma",
-                        choices=["gamma", "permu", "limit"],
+                        choices=["gamma", "permu", "limit", "gamma_sample"],
                         help="p-value method: gamma (permutation null + Gamma "
                              "fit), permu (plain permutation), or limit (HBE "
-                             "limit law, no permutations, O(n^3))")
+                             "limit law, no permutations, O(n^3)), or gamma_sample "
+                             "(fixed stratified subsample Gamma calibration)")
+    parser.add_argument('--ratio',type=float,default=0.1,
+                        help='fixed stratified subsample fraction for gamma_sample (default 0.1)')
     parser.add_argument("--backend", type=str, default="auto",
                         choices=["auto", "c", "numpy"],
                         help="BCov implementation: 'auto' uses the compiled C "
@@ -848,6 +890,7 @@ def main(argv=None):
         perm_seed=args.perm_seed,
         distance_backend=args.distance_backend,
         distance_block_size=args.distance_block_size,
+        ratio=args.ratio,
     )
 
 

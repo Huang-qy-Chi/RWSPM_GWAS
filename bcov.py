@@ -628,8 +628,114 @@ def _bcov_snp_from_ranks(code, RY, n_lev):
     return total * inv * inv
 
 
+def make_gamma_sample_plan(X, ratio=0.1, n_perm=199, seed=0):
+    """Fixed per-SNP stratified sample and within-sample permutations.
+
+    Integer quotas approximate full proportions while retaining every present
+    dosage class. Absent classes are not invented. Sampling is without replacement.
+    """
+    import hashlib
+    x = np.asarray(X, dtype=np.float64).reshape(-1)
+    if x.size < 2 or not np.isfinite(x).all() or not np.isin(x, [0, 1, 2]).all():
+        raise ValueError('gamma_sample requires at least two finite 0/1/2 dosages; missing values must be handled explicitly')
+    if not np.isfinite(ratio) or not 0 < ratio <= 1:
+        raise ValueError('ratio must be finite and in (0, 1]')
+    if isinstance(n_perm, (bool, np.bool_)) or int(n_perm) != n_perm or n_perm < 2:
+        raise ValueError('gamma_sample requires integer n_perm >= 2')
+    levels, counts = np.unique(x, return_counts=True)
+    n = len(x)
+    m = min(n, max(int(np.ceil(ratio*n)), len(levels), 2))
+    target = m*counts/n
+    quota = np.clip(np.floor(target).astype(int), 1, counts)
+    while quota.sum() < m:
+        eligible = np.flatnonzero(quota < counts)
+        k = eligible[np.argmax((target-quota)[eligible])]
+        quota[k] += 1
+    while quota.sum() > m:
+        eligible = np.flatnonzero(quota > 1)
+        k = eligible[np.argmax((quota-target)[eligible])]
+        quota[k] -= 1
+    rng = np.random.default_rng(seed)
+    indices = (np.arange(n) if m == n else np.sort(np.concatenate([
+        rng.choice(np.flatnonzero(x == level), size=int(q), replace=False)
+        for level,q in zip(levels,quota)])))
+    indices = np.ascontiguousarray(indices, dtype=np.int64)
+    permutations = make_permutations(m, int(n_perm), seed=seed)
+    indices.flags.writeable = False
+    permutations.flags.writeable = False
+    return {'n':n, 'm':m, 'ratio':float(ratio), 'seed':int(seed),
+            'n_perm':int(n_perm), 'perm_seed':int(seed), 'levels':levels.tolist(),
+            'full_counts':counts.tolist(), 'sample_counts':quota.tolist(),
+            'proportion_errors':(quota/m-counts/n).tolist(),
+            'indices':indices, 'perms':permutations,
+            'snp_sha256':hashlib.sha256(x.tobytes()).hexdigest()}
+
+
+def bcov_snp_gamma_sample(X, DY=None, RY=None, n_perm=199, ratio=0.1,
+                          backend=None, seed=0, plan=None, return_details=False):
+    """Fit Gamma to m*BCov_m^2; evaluate the full n*BCov_n^2 statistic.
+
+    Approximate calibration, not an exact full-sample permutation test.
+    A full rank submatrix must be re-ranked within the selected sample.
+    """
+    import hashlib
+    from gammafit import gamma_moment_match
+    x = np.asarray(X, dtype=np.float64).reshape(-1)
+    if plan is None:
+        plan = make_gamma_sample_plan(x, ratio, n_perm, seed)
+    if (plan['n'] != len(x) or plan['n_perm'] != n_perm
+            or plan['ratio'] != ratio
+            or plan['snp_sha256'] != hashlib.sha256(x.tobytes()).hexdigest()):
+        raise ValueError('Sampling plan does not match this SNP/ratio/n_perm')
+    details = {k:v for k,v in plan.items() if k not in ('indices','perms')}
+    n_perm = plan['n_perm']
+    details.update(ratio_effective=plan['m']/len(x),
+                   calibration_counts=plan['sample_counts'],
+                   scaling='null=m*BCov_m^2; observed=n*BCov_n^2', fallback_reason=None)
+    if len(plan['levels']) == 1:
+        details.update(fallback_reason='constant_snp', shape=None, scale=None)
+        return (0.0,1.0,details) if return_details else (0.0,1.0)
+    if RY is None:
+        if DY is None: raise ValueError('gamma_sample requires full RY or DY')
+        RY = _rank_rows_leq(DY)
+    RY = np.asarray(RY)
+    n = len(x)
+    if RY.shape != (n,n) or not np.isfinite(RY).all() or RY.min() < 1 or RY.max() > n:
+        raise ValueError('Invalid full rank matrix')
+    stat = bcov_snp_stat(x, RY, backend=backend)
+    m = plan['m']
+    idx = plan['indices']
+    if m == n:
+        sample_rank = RY
+    else:
+        # Global ranks preserve distance order/ties but their counts include
+        # omitted subjects. Re-ranking is required before passing them to C.
+        sample_rank = _rank_rows_leq(RY[np.ix_(idx,idx)]).astype(np.int64)
+    null = bcov_snp_null(x[idx], sample_rank, plan['perms'], backend=backend)
+    null_scaled = m*null
+    if not np.isfinite(null_scaled).all(): raise ValueError('Non-finite permutation statistics')
+    if np.var(null_scaled, ddof=1) <= 0 and m < n:
+        m = n
+        null_scaled = n*bcov_snp_null(x,RY,make_permutations(n,n_perm,seed=plan.get('perm_seed',plan['seed'])),backend=backend)
+        details.update(fallback_reason='zero_subsample_null_variance', ratio_effective=1.0,
+                       calibration_counts=plan['full_counts'])
+    if np.var(null_scaled, ddof=1) <= 0 or np.mean(null_scaled) <= 0:
+        details.update(fallback_reason='degenerate_full_null', shape=None,scale=None,
+                       calibration_m=m)
+        # The full null is invariant; no Gamma fit is identifiable.
+        p = float((1+np.sum(null_scaled >= n*stat))/(n_perm+1))
+    else:
+        fit = gamma_moment_match(null_scaled)
+        if not all(np.isfinite(fit[k]) and fit[k]>0 for k in ('shape','scale')):
+            raise ValueError('Invalid sampled Gamma parameters')
+        p = float(stats.gamma.sf(n*stat,a=fit['shape'],scale=fit['scale']))
+        details.update(fit,calibration_m=m)
+    if not np.isfinite(stat) or not np.isfinite(p): raise ValueError('Non-finite gamma_sample result')
+    return (float(stat),p,details) if return_details else (float(stat),p)
+
+
 def bcov_snp(X, DY, n_perm=9, method='gamma', RY=None, backend=None,
-             perms=None):
+             perms=None, ratio=0.1, sample_seed=0, sample_plan=None):
     """
     SNP-specialised Ball Covariance permutation test.
 
@@ -653,7 +759,9 @@ def bcov_snp(X, DY, n_perm=9, method='gamma', RY=None, backend=None,
         touches ``DY``).
     n_perm : int, optional
         Permutations used for the null distribution (default 9).
-    method : {'gamma', 'permu', 'limit'}, optional
+    method : {'gamma', 'permu', 'limit', 'gamma_sample'}, optional
+        ``'gamma_sample'`` -- fixed stratified sample with all present dosage
+        classes retained; fit on m*BCov_m^2 and evaluate n*BCov_n^2.
         ``'gamma'`` (default) -- moment-matched Gamma approximation fitted to
         the permutation null, as in :func:`bcov_perm_test_gwas`.
         ``'permu'`` -- permutation p-value ``(1 + #{null >= stat}) /
@@ -675,6 +783,13 @@ def bcov_snp(X, DY, n_perm=9, method='gamma', RY=None, backend=None,
         Pre-drawn permutation index vectors (see :func:`make_permutations`).
         Supplying them lets one permutation set be shared by every region of a
         scan, which is what makes :func:`bcov_snp_null` reusable across regions.
+    ratio : float, optional
+        Sample fraction for gamma_sample only, default 0.1. Integer quotas
+        retain every present class, so effective fraction may be larger.
+    sample_seed : int, optional
+        Deterministic per-SNP sample/permutation seed for gamma_sample.
+    sample_plan : dict, optional
+        Output of make_gamma_sample_plan, shared across regions for one SNP.
 
     Returns
     -------
@@ -685,6 +800,12 @@ def bcov_snp(X, DY, n_perm=9, method='gamma', RY=None, backend=None,
     """
     x = np.asarray(X, dtype=float).reshape(-1)
     n = x.shape[0]
+
+    if method == 'gamma_sample':
+        if perms is not None:
+            raise ValueError('gamma_sample uses sample_plan permutations, not full-sample perms')
+        return bcov_snp_gamma_sample(x,DY=DY,RY=RY,n_perm=n_perm,ratio=ratio,
+                                    backend=backend,seed=sample_seed,plan=sample_plan)
 
     if method == 'limit':
         # The limit law needs no permutations, so RY is not required at all.
@@ -920,7 +1041,8 @@ def bcov_snp_limit_prep(X, FEAT=None, weight='constant'):
 
 
 def bcov_perm_test_snp_gwas(x, DY, n_perm=9, method='gamma', RY=None,
-                            backend=None, perms=None):
+                            backend=None, perms=None, ratio=0.1, sample_seed=0,
+                            sample_plan=None):
     """
     Signature-compatible alias of :func:`bcov_snp`.
 
@@ -928,7 +1050,8 @@ def bcov_perm_test_snp_gwas(x, DY, n_perm=9, method='gamma', RY=None,
     SNP-specialised test by changing only the imported name.
     """
     return bcov_snp(x, DY, n_perm=n_perm, method=method, RY=RY,
-                    backend=backend, perms=perms)
+                    backend=backend, perms=perms, ratio=ratio,
+                    sample_seed=sample_seed, sample_plan=sample_plan)
 
 
 if __name__ == "__main__":
